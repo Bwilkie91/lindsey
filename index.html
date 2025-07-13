@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="RSVP and match for Ben & Sara's wedding. Find your match, chat, and contribute to the registry!">
+    <link rel="icon" type="image/png" href="https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f492.png">
+    <title>GuestList - Wedding RSVP & Match</title>
+    <base href="./">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lora:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        .guestlist-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 18px;
+        }
+        .guestlist-logo svg {
+            width: 60px;
+            height: 60px;
+            margin-right: 10px;
+        }
+        .guestlist-logo-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.1rem;
+            font-weight: 700;
+            color: #3a2c1a;
+            letter-spacing: 1px;
+            background: linear-gradient(90deg, #e6b980 10%, #eacda3 40%, #b06ab3 80%, #4568dc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+            text-shadow: 0 2px 12px rgba(176,106,179,0.13), 0 1px 0 #fff;
+        }
+        @media (max-width: 375px) {
+            .guestlist-logo svg { width: 44px; height: 44px; }
+            .guestlist-logo-text { font-size: 1.3rem; }
+        }
+    </style>
+    <style>
+        :root {
+            --primary-color: #a34a41; /* A rich, warm tone for primary actions */
+            --secondary-color: #f5e6cc; /* A soft, complementary background or accent */
+            --text-dark: #333;
+            --text-light: #fff;
+            --border-light: #e0e0e0;
+            --box-shadow-light: rgba(0,0,0,0.08);
+            --box-shadow-medium: rgba(0,0,0,0.15);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--secondary-color); /* Lighter background for overall app */
+            font-family: 'Lora', serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            touch-action: manipulation;
+            line-height: 1.6;
+        }
+
+        .app-container {
+            max-width: 430px;
+            margin: 0 auto;
+            background: var(--text-light); /* White background for the app content area */
+            min-height: 100vh;
+            box-shadow: 0 0 20px var(--box-shadow-medium); /* Stronger, more refined shadow */
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px; /* Slightly rounded corners for the app container */
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 430px;
+            background: var(--text-light);
+            border-top: 1px solid var(--border-light);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            z-index: 1000;
+            box-shadow: 0 -4px 10px var(--box-shadow-light); /* Improved shadow for bottom nav */
+            border-top-left-radius: 10px; /* Match app container border-radius */
+            border-top-right-radius: 10px;
+        }
+
+        .nav-item {
+            text-align: center;
+            color: #888; /* Softer grey for inactive icons */
+            font-size: 12px;
+            text-decoration: none;
+            padding: 5px; /* Added padding for touch targets */
+            transition: color 0.3s ease, transform 0.2s ease;
+        }
+
+        .nav-item.active {
+            color: var(--primary-color); /* Highlight active item with primary color */
+            transform: translateY(-2px); /* Subtle lift on active */
+        }
+
+        .nav-item i {
+            font-size: 24px;
+            display: block;
+            margin-bottom: 4px; /* Increased margin for icon-text separation */
+        }
+
+        /* Hide profile, matches, chat until RSVP single is checked */
+        .nav-item[data-section="profile"],
+        .nav-item[data-section="matches"],
+        .nav-item[data-section="chat"] {
+            display: none;
+        }
+
+        section {
+            padding: 30px 20px; /* More padding for content sections */
+            margin-bottom: 80px; /* Ensure content doesn't get hidden by nav */
+            animation: slideIn 0.6s cubic-bezier(0.23, 1, 0.32, 1); /* Smoother animation */
+            min-height: calc(100vh - 80px); /* Fill available space */
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        h1, h2 {
+            font-family: 'Playfair Display', serif; /* Elegant font for headings */
+            font-weight: 700;
+            color: var(--primary-color); /* Headings in primary color */
+            margin-bottom: 25px; /* More space below headings */
+            text-align: center; /* Center align headings */
+        }
+
+        .card {
+            border-radius: 18px; /* More rounded cards */
+            border: none;
+            box-shadow: 0 8px 20px var(--box-shadow-light); /* Deeper shadow for cards */
+            overflow: hidden;
+            margin-bottom: 25px; /* More space between cards */
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            border: none;
+            border-radius: 30px; /* More pill-shaped buttons */
+            padding: 14px 25px; /* Larger padding for better touch area */
+            font-weight: 700; /* Bolder text */
+            transition: background 0.3s ease, transform 0.2s ease;
+            letter-spacing: 0.5px; /* Slightly more space between letters */
+        }
+
+        .btn-primary:hover {
+            background: darken(var(--primary-color), 10%); /* Darken on hover (requires Sass or equivalent) */
+            background: #8b3c34; /* Manual darker shade for simplicity */
+            transform: translateY(-2px); /* Subtle lift on hover */
+        }
+
+        .form-control, .form-select {
+            border-radius: 12px; /* More rounded form inputs */
+            border: 1px solid var(--border-light);
+            padding: 14px; /* Larger padding for inputs */
+            font-size: 16px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05); /* Subtle inner shadow */
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(var(--primary-color-rgb), .25); /* Bootstrap focus color adjusted */
+            outline: none;
+        }
+
+        .swipe-card {
+            max-width: 100%;
+            position: relative;
+            transition: transform 0.4s ease-out, opacity 0.4s ease-out; /* Slower, smoother transition */
+            cursor: grab; /* Indicate it's draggable */
+        }
+
+        .profile-img {
+            width: 100%;
+            height: 450px; /* Slightly taller images */
+            object-fit: cover;
+            border-top-left-radius: 18px; /* Match card border-radius */
+            border-top-right-radius: 18px;
+        }
+
+        .swipe-buttons {
+            display: flex;
+            justify-content: space-around;
+            padding: 20px; /* More padding */
+            gap: 20px; /* Space between buttons */
+        }
+
+        .swipe-btn {
+            width: 70px; /* Larger buttons */
+            height: 70px;
+            border-radius: 50%;
+            font-size: 28px; /* Larger icons */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2); /* Stronger shadow */
+            transition: transform 0.2s ease, background 0.3s ease;
+            cursor: pointer;
+            border: none; /* Remove default button border */
+        }
+
+        .swipe-btn:hover {
+            transform: translateY(-3px); /* More pronounced lift */
+        }
+
+        .swipe-btn.btn-danger {
+            background: #dc3545; /* Bootstrap danger color */
+            color: var(--text-light);
+        }
+
+        .swipe-btn.btn-success {
+            background: #198754; /* Bootstrap success color */
+            color: var(--text-light);
+        }
+
+        .chat-container {
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 15px; /* More padding */
+            background: #f8f9fa; /* Lighter background for chat area */
+            border-radius: 15px;
+            border: 1px solid var(--border-light); /* Subtle border for chat container */
+            display: flex;
+            flex-direction: column;
+            gap: 10px; /* Space between chat bubbles */
+        }
+
+        .chat-bubble {
+            padding: 12px 18px;
+            border-radius: 20px;
+            max-width: 75%; /* Allow bubbles to be slightly wider */
+            font-size: 15px;
+            word-wrap: break-word; /* Ensure long words wrap */
+        }
+
+        .chat-bubble.received {
+            background: #e9ecef; /* Lighter grey for received */
+            color: var(--text-dark);
+            align-self: flex-start; /* Align to the left */
+            border-bottom-left-radius: 5px; /* Sharper corner on one side */
+        }
+
+        .chat-bubble.sent {
+            background: var(--primary-color);
+            color: var(--text-light);
+            align-self: flex-end; /* Align to the right */
+            border-bottom-right-radius: 5px; /* Sharper corner on one side */
+        }
+
+        /* Chat list styling */
+        .chat-list {
+            display: flex;
+            overflow-x: auto;
+            margin-bottom: 20px; /* More space below chat list */
+            padding: 10px 0; /* Padding for scrollable area */
+            gap: 15px; /* Space between chat items */
+            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+            scrollbar-width: none; /* Hide scrollbar for Firefox */
+        }
+
+        .chat-list::-webkit-scrollbar {
+            display: none; /* Hide scrollbar for Webkit browsers */
+        }
+
+        .chat-item {
+            flex-shrink: 0; /* Prevent items from shrinking */
+            display: flex;
+            flex-direction: column; /* Stack image and name */
+            align-items: center;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 12px; /* Rounded items */
+            transition: background 0.2s, transform 0.2s;
+            text-align: center;
+        }
+
+        .chat-item:hover {
+            background: rgba(var(--primary-color-rgb), 0.1);
+            transform: translateY(-2px);
+        }
+
+        .chat-item img {
+            width: 60px; /* Larger profile images in chat list */
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 5px;
+            border: 2px solid var(--border-light); /* Subtle border */
+        }
+
+        .chat-item.active img {
+            border-color: var(--primary-color); /* Highlight active chat image */
+        }
+
+        .chat-item .chat-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .chat-item .chat-info strong {
+            font-size: 14px;
+            color: var(--text-dark);
+        }
+
+        .chat-item .chat-info small {
+            font-size: 11px; /* Smaller text for prompt */
+            color: #999;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 80px; /* Limit width of prompt text */
+        }
+
+        .input-group .form-control {
+            border-right: none;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        .input-group .btn-primary {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Splash Screen Styling */
+        #splash {
+            background: url('https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=800&h=1200') no-repeat center center/cover; /* Higher resolution image and specified dimensions */
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: var(--text-light);
+            position: relative;
+            padding: 20px;
+            overflow: hidden; /* Prevent content overflow during animation */
+        }
+
+        #splash::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6); /* Slightly darker overlay */
+            z-index: 1;
+        }
+
+        .splash-content {
+            position: relative;
+            z-index: 2;
+            max-width: 350px;
+            animation: fadeInScale 1.2s cubic-bezier(0.23, 1, 0.32, 1); /* New animation for splash content */
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.15); /* Subtle translucent background */
+            border-radius: 15px;
+            backdrop-filter: blur(5px); /* Frosted glass effect */
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3); /* Prominent shadow */
+        }
+
+        .splash-content h1 {
+            font-family: 'Playfair Display', serif; /* Consistent elegant font */
+            font-size: 56px; /* Larger and more impactful title */
+            color: var(--secondary-color); /* Light cream color for names */
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.4); /* Stronger text shadow */
+            margin-bottom: 10px;
+        }
+
+        .splash-content p {
+            font-family: 'Lora', serif;
+            font-size: 17px; /* Slightly larger text */
+            margin: 8px 0; /* Adjusted margins */
+            color: var(--secondary-color);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+
+        .splash-content .btn-primary {
+            background: var(--primary-color);
+            border: none;
+            font-family: 'Lora', serif;
+            font-size: 17px; /* Consistent button font size */
+            padding: 15px 35px; /* Larger button */
+            margin-top: 20px;
+            transition: transform 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2); /* Button shadow */
+        }
+
+        .splash-content .btn-primary:hover {
+            background: #8b3c34; /* Manual darker shade */
+            transform: scale(1.08) translateY(-3px); /* More pronounced effect */
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Registry images styling */
+        .card-img-top.registry-img {
+            width: 100%;
+            height: 150px; /* Fixed height for consistent registry image display */
+            object-fit: cover;
+            border-top-left-radius: 18px;
+            border-top-right-radius: 18px;
+        }
+        .card-body h5.card-title {
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+        .card-body p.card-text {
+            font-weight: 700;
+            color: var(--primary-color);
+            font-size: 16px;
+        }
+
+        /* Utility classes for responsive fonts */
+        @media (max-width: 375px) {
+            .splash-content h1 {
+                font-size: 48px;
+            }
+            .splash-content p {
+                font-size: 16px;
+            }
+            .nav-item {
+                font-size: 11px;
+            }
+            .nav-item i {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+<main class="app-container" id="main-content" tabindex="-1">
+
+    <section id="splash">
+        <div class="splash-content">
+            <div class="guestlist-logo">
+                <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 4px 16px rgba(70,40,120,0.18));">
+                    <defs>
+                        <!-- Vibrant gradient background -->
+                        <linearGradient id="impress-bg" x1="0" y1="0" x2="60" y2="60" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#eacda3"/>
+                            <stop offset="0.4" stop-color="#e6b980"/>
+                            <stop offset="0.7" stop-color="#b06ab3"/>
+                            <stop offset="1" stop-color="#4568dc"/>
+                        </linearGradient>
+                        <!-- Glass overlay -->
+                        <linearGradient id="impress-glass" x1="0" y1="0" x2="0" y2="60" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#fff" stop-opacity="0.22"/>
+                            <stop offset="1" stop-color="#fff" stop-opacity="0.09"/>
+                        </linearGradient>
+                        <!-- Checklist line gradient -->
+                        <linearGradient id="impress-line" x1="0" y1="0" x2="1" y2="0" gradientUnits="objectBoundingBox">
+                            <stop stop-color="#f7e8d0"/>
+                            <stop offset="1" stop-color="#b06ab3"/>
+                        </linearGradient>
+                        <!-- Heart gradient -->
+                        <linearGradient id="impress-heart" x1="44" y1="36" x2="44" y2="48" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#eacda3"/>
+                            <stop offset="1" stop-color="#b06ab3"/>
+                        </linearGradient>
+                    </defs>
+                    <!-- Main rounded square background with glassy overlay -->
+                    <rect x="2" y="2" width="56" height="56" rx="14" fill="url(#impress-bg)" stroke="#b06ab3" stroke-width="2"/>
+                    <rect x="2" y="2" width="56" height="56" rx="14" fill="url(#impress-glass)"/>
+                    <!-- Checklist (3 lines) -->
+                    <rect x="16" y="18" width="20" height="4" rx="2" fill="url(#impress-line)" opacity="0.92"/>
+                    <rect x="16" y="28" width="20" height="4" rx="2" fill="url(#impress-line)" opacity="0.85"/>
+                    <rect x="16" y="38" width="20" height="4" rx="2" fill="url(#impress-line)" opacity="0.78"/>
+                    <!-- Checkmark for the first item -->
+                    <path d="M40 20l3 3 6-7" stroke="#4568dc" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <!-- Heart accent -->
+                    <path d="M44 44c-2.5-2.5-7-4-7-8a4 4 0 0 1 7-2.5A4 4 0 0 1 51 36c0 4-4.5 5.5-7 8z" fill="url(#impress-heart)" stroke="#b06ab3" stroke-width="1.2" opacity="0.95"/>
+                    <!-- Glass shine ellipse -->
+                    <ellipse cx="30" cy="18" rx="10" ry="3.2" fill="#fff" opacity="0.13"/>
+                </svg>
+                <span class="guestlist-logo-text">GuestList</span>
+            </div>
+            <h1>Jake & Sara</h1>
+            <p>Together with their families, invite you to celebrate their wedding</p>
+            <p>Saturday, August 15, 2025 | 4:00 PM</p>
+            <p>Sunset Gardens, Napa Valley, CA</p>
+            <button class="btn btn-primary" onclick="enterApp()">RSVP</button>
+        </div>
+    </section>
+
+    <section id="rsvp">
+        <h2 class="mb-4">RSVP</h2>
+        <form id="rsvp-form">
+            <div class="mb-3">
+                <label for="attendance" class="form-label">Will you attend?</label>
+                <select class="form-select" id="attendance" name="attendance">
+                    <option selected>Yes, joyfully!</option>
+                    <option>No, regretfully</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="meal" class="form-label">Meal Choice</label>
+                <select class="form-select" id="meal" name="meal">
+                    <option>Vegan</option>
+                    <option selected>Grilled Salmon</option>
+                    <option>Beef Tenderloin</option>
+                    <option>Vegetarian Risotto</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="plusone" class="form-label">Plus One Name</label>
+                <input type="text" class="form-control" id="plusone" name="plusone" value="James Carter">
+            </div>
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="single" name="single">
+                <label class="form-check-label" for="single">I'm single and open to matching</label>
+            </div>
+            <div class="mb-3">
+                <label for="song" class="form-label">Song Request</label>
+                <input type="text" class="form-control" id="song" name="song" value="At Last - Etta James">
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Submit RSVP</button>
+        </form>
+    </section>
+
+    <section id="profile">
+        <h2 class="mb-4">Your Profile</h2>
+        <div class="card">
+            <div class="card-body">
+                <form id="profile-form">
+                    <div class="mb-3 text-center">
+                        <label for="photo" class="form-label">Profile Photo</label>
+                        <input type="file" class="form-control mb-2" id="photo" name="photo">
+                        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200&h=200" class="rounded-circle mt-2" alt="Emma Profile" style="width: 120px; height: 120px; object-fit: cover; border: 3px solid var(--primary-color);">
+                    </div>
+                    <div class="mb-3">
+                        <label for="bio" class="form-label">Bio</label>
+                        <textarea class="form-control" id="bio" name="bio" rows="4">Hi, I'm Emma, a 27-year-old graphic designer who loves sunset hikes, jazz music, and a good glass of wine. Excited to celebrate love and maybe meet someone special!</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="prompt1" class="form-label">My ideal date is...</label>
+                        <input type="text" class="form-control" id="prompt1" name="prompt1" value="Dancing under the stars with live music">
+                    </div>
+                    <div class="mb-3">
+                        <label for="prompt2" class="form-label">I'm looking for...</label>
+                        <input type="text" class="form-control" id="prompt2" name="prompt2" value="A kind soul with a passion for adventure">
+                    </div>
+                    <div class="mb-3">
+                        <label for="interests" class="form-label">Interests</label>
+                        <input type="text" class="form-control" id="interests" name="interests" value="Hiking, Jazz, Wine Tasting, Photography">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Save Profile</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <section id="matches">
+        <h2 class="mb-4">Match with Others Going to Jake & Sara's Wedding</h2>
+        <div class="swipe-card card" id="swipe-card">
+            <img src="https://images.unsplash.com/photo-1506794778202-6d1f07e0e6a0?auto=format&fit=crop&q=80&w=400&h=450" class="profile-img" alt="Alex Photo" loading="lazy">
+            <div class="card-body">
+                <h5 class="card-title">Alex Thompson, 28</h5>
+                <p class="card-text">Outdoor enthusiast and dance floor pro. Always up for a good adventure!<br><strong>Prompt:</strong> "My perfect wedding date would be a dance-off!"</p>
+            </div>
+        </div>
+        <div class="swipe-buttons">
+            <button class="swipe-btn btn-danger" onclick="swipeLeft()"><i class="fas fa-times"></i></button>
+            <button class="swipe-btn btn-success" onclick="swipeRight()"><i class="fas fa-heart"></i></button>
+        </div>
+    </section>
+
+    <section id="chat">
+        <h2 class="mb-4">Chats</h2>
+        <div class="chat-list" id="chat-list"></div>
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title" id="chat-header">Chat with Alex</h5>
+                <div class="chat-container" id="chat-container">
+                    <div class="chat-bubble received">Hey Emma! Excited for the wedding?</div>
+                    <div class="chat-bubble sent">Absolutely, it's going to be magical!</div>
+                    <div class="chat-bubble received">Totally! Got any plans for the reception?</div>
+                    <div class="chat-bubble sent">Hoping to hit the dance floor and try the signature cocktail!</div>
+                    <div class="chat-bubble received">Nice! Let's make a plan to dance together 😄</div>
+                </div>
+                <form id="chat-form" class="mt-3">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="chat-input" placeholder="Type a message...">
+                        <button class="btn btn-primary" type="submit"><i class="fas fa-paper-plane"></i></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <section id="registry">
+        <h2 class="mb-4">Wedding Registry</h2>
+        <div class="row g-3">
+            <!-- 1. Add a registry intro and instructions -->
+            <div class="col-12">
+                <div class="alert alert-info text-center py-2 mb-2" style="font-size:15px;">
+                    Choose a gift to help us start our new life together! Tap "Contribute" to reserve or contribute to an item. Thank you for your generosity!
+                </div>
+            </div>
+            <!-- 2. Add a new registry item (Coffee Maker) -->
+            <div class="col-6 mb-4">
+                <div class="card h-100 border-primary shadow-sm">
+                    <img src="https://images.unsplash.com/photo-1502741338009-cac2772e18bc?auto=format&fit=crop&w=400&q=80" class="card-img-top registry-img" alt="Coffee Maker" loading="lazy">
+                    <div class="card-body d-flex flex-column justify-content-between">
+                        <h5 class="card-title">Coffee Maker</h5>
+                        <p class="card-text">$120</p>
+                        <button class="btn btn-primary btn-sm w-100 mt-2" onclick="contributeRegistry()">Contribute</button>
+                    </div>
+                </div>
+            </div>
+            <!-- 3. Add a progress bar to Honeymoon Fund -->
+            <div class="col-6 mb-4">
+                <div class="card h-100 border-primary shadow-sm">
+                    <img src="https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80" class="card-img-top registry-img" alt="Honeymoon Fund" loading="lazy">
+                    <div class="card-body d-flex flex-column justify-content-between">
+                        <h5 class="card-title">Honeymoon Fund</h5>
+                        <p class="card-text">$200 contributed</p>
+                        <div class="progress mb-2" style="height: 8px;">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: 40%;" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <button class="btn btn-primary btn-sm w-100 mt-2" onclick="contributeRegistry()">Contribute</button>
+                    </div>
+                </div>
+            </div>
+            <!-- 4. Add a badge for "Most Popular" to Cookware Set -->
+            <div class="col-6 mb-4">
+                <div class="card h-100 border-primary shadow-sm position-relative">
+                    <span class="badge bg-warning text-dark position-absolute top-0 end-0 m-2" style="z-index:2;">Most Popular</span>
+                    <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80" class="card-img-top registry-img" alt="Le Creuset Cookware Set" loading="lazy">
+                    <div class="card-body d-flex flex-column justify-content-between">
+                        <h5 class="card-title">Le Creuset Cookware Set</h5>
+                        <p class="card-text">$250</p>
+                        <button class="btn btn-primary btn-sm w-100 mt-2" onclick="contributeRegistry()">Contribute</button>
+                    </div>
+                </div>
+            </div>
+            <!-- 5. Add a "Gifted" overlay to Spa Day Package (simulate as unavailable) -->
+            <div class="col-6 mb-4">
+                <div class="card h-100 border-primary shadow-sm position-relative">
+                    <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style="background:rgba(255,255,255,0.7);z-index:2;">
+                        <span class="badge bg-secondary fs-5">Gifted</span>
+                    </div>
+                    <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80" class="card-img-top registry-img" alt="Spa Day Package" loading="lazy">
+                    <div class="card-body d-flex flex-column justify-content-between">
+                        <h5 class="card-title">Spa Day Package</h5>
+                        <p class="card-text">$150</p>
+                        <button class="btn btn-primary btn-sm w-100 mt-2" onclick="contributeRegistry()" disabled>Contribute</button>
+                    </div>
+                </div>
+            </div>
+            <!-- 6. Custom Photo Album (improved image and card) -->
+            <div class="col-6 mb-4">
+                <div class="card h-100 border-primary shadow-sm">
+                    <img src="https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80" class="card-img-top registry-img" alt="Custom Photo Album" loading="lazy">
+                    <div class="card-body d-flex flex-column justify-content-between">
+                        <h5 class="card-title">Custom Photo Album</h5>
+                        <p class="card-text">$75</p>
+                        <button class="btn btn-primary btn-sm w-100 mt-2" onclick="contributeRegistry()">Contribute</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <nav class="bottom-nav" id="bottom-nav" role="navigation" aria-label="Main Navigation">
+        <a href="#rsvp" class="nav-item" data-section="rsvp" role="link" tabindex="0"><i class="fas fa-check-circle"></i>RSVP</a>
+        <a href="#profile" class="nav-item" data-section="profile" role="link" tabindex="0"><i class="fas fa-user"></i>Profile</a>
+        <a href="#matches" class="nav-item" data-section="matches" role="link" tabindex="0"><i class="fas fa-heart"></i>Matches</a>
+        <a href="#chat" class="nav-item" data-section="chat" role="link" tabindex="0"><i class="fas fa-comments"></i>Chat</a>
+        <a href="#registry" class="nav-item" data-section="registry" role="link" tabindex="0"><i class="fas fa-gift"></i>Registry</a>
+    </nav>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous" defer></script>
+<script>
+    // Simulated backend data
+    const appState = {
+        user: null,
+        matches: [
+            {
+                id: 1,
+                name: "Alex Thompson",
+                age: 28,
+                bio: "Outdoor enthusiast and dance floor pro. Always up for a good adventure!",
+                prompt: "My perfect wedding date would be a dance-off!",
+                photo: "https://randomuser.me/api/portraits/men/32.jpg",
+                chat: [
+                    { from: 'them', text: "Hey Emma! Excited for the wedding?" },
+                    { from: 'me', text: "Absolutely, it's going to be magical!" },
+                    { from: 'them', text: "Totally! Got any plans for the reception?" },
+                    { from: 'me', text: "Hoping to hit the dance floor and try the signature cocktail!" },
+                    { from: 'them', text: "Nice! Let's make a plan to dance together 😄" }
+                ]
+            },
+            {
+                id: 2,
+                name: "Sarah Lee",
+                age: 25,
+                bio: "Foodie and travel buff. Let's find the best dessert at the wedding!",
+                prompt: "Let's explore the dessert table together!",
+                photo: "https://randomuser.me/api/portraits/women/44.jpg",
+                chat: [
+                    { from: 'them', text: "Hi Emma! Are you bringing a plus one?" },
+                    { from: 'me', text: "Yes, my friend James is coming!" },
+                    { from: 'them', text: "Awesome! Can't wait to meet him. What's your favorite dessert?" },
+                    { from: 'me', text: "Tiramisu! How about you?" },
+                    { from: 'them', text: "Chocolate lava cake all the way!" }
+                ]
+            },
+            {
+                id: 3,
+                name: "Michael Patel",
+                age: 30,
+                bio: "Loves live music and deep conversations. Ready for a memorable night!",
+                prompt: "A great wedding date means sharing a laugh and a dance.",
+                photo: "https://randomuser.me/api/portraits/men/65.jpg",
+                chat: [
+                    { from: 'them', text: "Hey! Do you play any instruments?" },
+                    { from: 'me', text: "A little piano. You?" },
+                    { from: 'them', text: "Guitar! Maybe we can jam at the afterparty." },
+                    { from: 'me', text: "That would be so fun!" }
+                ]
+            },
+            {
+                id: 4,
+                name: "Claire Nguyen",
+                age: 26,
+                bio: "Art lover and coffee addict. Excited to meet new people!",
+                prompt: "Let's sneak away for a quiet chat under the stars.",
+                photo: "https://randomuser.me/api/portraits/women/68.jpg",
+                chat: [
+                    { from: 'them', text: "Emma, do you like art galleries?" },
+                    { from: 'me', text: "Love them! Napa has some great ones." },
+                    { from: 'them', text: "Maybe we can check one out before the wedding?" },
+                    { from: 'me', text: "I'd like that!" }
+                ]
+            },
+            {
+                id: 5,
+                name: "David Kim",
+                age: 29,
+                bio: "Runner, foodie, and tech enthusiast. Looking forward to the big day!",
+                prompt: "Let's race to the dance floor!",
+                photo: "https://randomuser.me/api/portraits/men/76.jpg",
+                chat: [
+                    { from: 'them', text: "Emma, are you running the 5k before the wedding?" },
+                    { from: 'me', text: "I am! Are you?" },
+                    { from: 'them', text: "Definitely. Let's pace each other." },
+                    { from: 'me', text: "Deal!" }
+                ]
+            },
+            {
+                id: 6,
+                name: "Priya Singh",
+                age: 27,
+                bio: "Yoga lover and aspiring chef. Excited to celebrate love!",
+                prompt: "A perfect date is a picnic under the stars.",
+                photo: "https://randomuser.me/api/portraits/women/12.jpg",
+                chat: [
+                    { from: 'them', text: "Emma, do you like to cook?" },
+                    { from: 'me', text: "Yes! What's your favorite dish to make?" },
+                    { from: 'them', text: "Homemade pasta. Maybe I can make it for you sometime!" },
+                    { from: 'me', text: "That sounds delicious!" }
+                ]
+            }
+        ],
+        currentMatchIndex: 0
+    };
+
+    // Test Framework - (keeping this as is for functionality testing)
+    const testResults = [];
+    function runTest(description, testFn) {
+        try {
+            testFn();
+            testResults.push(`✅ ${description}: Passed`);
+            console.log(`✅ ${description}: Passed`);
+        } catch (error) {
+            testResults.push(`❌ ${description}: Failed - ${error.message}`);
+            console.error(`❌ ${description}: Failed - ${error.message}`);
+        }
+    }
+
+    // Navigation with keyboard accessibility
+    function setupNavigation() {
+        const navItems = document.querySelectorAll('.nav-item');
+        navItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                navItems.forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                const sectionId = item.getAttribute('data-section');
+                document.querySelectorAll('section').forEach(section => {
+                    section.style.display = section.id === sectionId ? 'flex' : 'none'; // Use flex for sections
+                });
+                document.getElementById('main-content').focus();
+            });
+            // Keyboard navigation
+            item.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    item.click();
+                }
+            });
+        });
+        // Hide all sections except splash initially
+        document.querySelectorAll('section').forEach(section => section.style.display = 'none');
+        document.querySelector('#splash').style.display = 'flex'; // Use flex for splash
+    }
+
+    // Enter App from Splash
+    function enterApp() {
+        appState.user = { name: "Emma Wilson", id: 1 };
+        console.log("Test: User entered app", appState.user);
+        document.querySelector('#splash').style.display = 'none';
+        document.querySelector('#rsvp').style.display = 'flex'; // Use flex for RSVP
+        document.querySelector('.nav-item[data-section="rsvp"]').classList.add('active');
+    }
+
+    // RSVP Form Submission with validation
+    document.getElementById('rsvp-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const attendance = formData.get('attendance');
+        const single = formData.get('single') === 'on';
+
+        if (attendance === 'Yes, joyfully!') {
+            if (single) {
+                // 1. Smoothly transition RSVP out and Profile in with fade/slide
+                const rsvpSection = document.getElementById('rsvp');
+                const profileSection = document.getElementById('profile');
+                // Show nav items for singles
+                document.querySelectorAll('.nav-item[data-section="profile"], .nav-item[data-section="matches"], .nav-item[data-section="chat"]').forEach(item => {
+                    item.style.display = 'block';
+                });
+                // Animate RSVP out
+                rsvpSection.style.transition = 'opacity 0.5s, transform 0.5s';
+                rsvpSection.style.opacity = '0';
+                rsvpSection.style.transform = 'translateY(-30px)';
+                setTimeout(() => {
+                    rsvpSection.style.display = 'none';
+                    // Animate Profile in
+                    profileSection.style.display = 'flex';
+                    profileSection.style.opacity = '0';
+                    profileSection.style.transform = 'translateY(30px)';
+                    setTimeout(() => {
+                        profileSection.style.transition = 'opacity 0.5s, transform 0.5s';
+                        profileSection.style.opacity = '1';
+                        profileSection.style.transform = 'translateY(0)';
+                        // 2. Auto-focus first input in profile form
+                        const firstInput = profileSection.querySelector('input, textarea, select');
+                        if (firstInput) firstInput.focus();
+                    }, 10);
+                    // Set nav bar active state
+                    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                    document.querySelector('.nav-item[data-section="profile"]').classList.add('active');
+                }, 500);
+            } else {
+                // Show a witty splash screen for non-singles
+                showCongratsSplash();
+            }
+        } else if (attendance === 'No, regretfully') {
+            showNoResponseSplash();
+        }
+// Splash for RSVP 'No' response
+function showNoResponseSplash() {
+    // Hide all sections
+    document.querySelectorAll('section').forEach(section => section.style.display = 'none');
+    // Witty/friendly lines for declining
+    const noLines = [
+        "We'll miss you on the dance floor!",
+        "Sad to miss you, but thanks for letting us know.",
+        "No worries—save us a dance next time!",
+        "We'll eat an extra slice of cake for you!",
+        "Thanks for the RSVP. Hope to see you soon!"
+    ];
+    const randomLine = noLines[Math.floor(Math.random() * noLines.length)];
+    let splash = document.getElementById('noresponse-splash');
+    if (!splash) {
+        splash = document.createElement('section');
+        splash.id = 'noresponse-splash';
+        splash.style.display = 'flex';
+        splash.style.flexDirection = 'column';
+        splash.style.alignItems = 'center';
+        splash.style.justifyContent = 'center';
+        splash.style.height = '100vh';
+        splash.innerHTML = `
+            <div class="splash-content text-center">
+                <h1 style="font-size:2.2rem; color:var(--primary-color);">😢 RSVP Received</h1>
+                <p style="font-size:1.4rem; color:var(--primary-color); margin: 1.5em 0 1em 0;">${randomLine}</p>
+                <button class="btn btn-primary mt-2" onclick="returnToHome()">Back to Home</button>
+            </div>
+        `;
+        document.querySelector('main').appendChild(splash);
+    } else {
+        splash.style.display = 'flex';
+        const p = splash.querySelector('p');
+        if (p) p.textContent = randomLine;
+    }
+}
+        // ...existing RSVP submission logic...
+    });
+
+    // Add this function to show the witty splash screen
+    function showCongratsSplash() {
+        // Hide all sections
+        document.querySelectorAll('section').forEach(section => section.style.display = 'none');
+        // Witty one-liners
+        const wittyLines = [
+            "You're in! Hope you like cake.",
+            "RSVP complete. Time to pick out your best shoes!",
+            "Confirmed! Your seat is reserved and your drink is chilling.",
+            "You RSVP'd. Now go practice your dance moves!",
+            "RSVP done. The party just got better!"
+        ];
+        const randomLine = wittyLines[Math.floor(Math.random() * wittyLines.length)];
+        // Create or update a splash
+        let splash = document.getElementById('congrats-splash');
+        if (!splash) {
+            splash = document.createElement('section');
+            splash.id = 'congrats-splash';
+            splash.style.display = 'flex';
+            splash.style.flexDirection = 'column';
+            splash.style.alignItems = 'center';
+            splash.style.justifyContent = 'center';
+            splash.style.height = '100vh';
+            splash.innerHTML = `
+                <div class="splash-content text-center">
+                    <h1 style="font-size:2.2rem; color:var(--primary-color);">🎉 RSVP Confirmed! 🎉</h1>
+                    <p style="font-size:1.4rem; color:var(--primary-color); margin: 1.5em 0 1em 0;">${randomLine}</p>
+                    <button class="btn btn-primary mt-2" onclick="returnToHome()">Back to Home</button>
+                </div>
+            `;
+            document.querySelector('main').appendChild(splash);
+        } else {
+            splash.style.display = 'flex';
+            const p = splash.querySelector('p');
+            if (p) p.textContent = randomLine;
+        }
+    }
+
+    // Add this function to return to the home/splash
+function returnToHome() {
+    // Hide both splash screens if present
+    const congrats = document.getElementById('congrats-splash');
+    if (congrats) congrats.style.display = 'none';
+    const noresp = document.getElementById('noresponse-splash');
+    if (noresp) noresp.style.display = 'none';
+    document.getElementById('splash').style.display = 'flex';
+}
+
+    // Profile Form Submission with validation
+    document.getElementById('profile-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const profileData = Object.fromEntries(formData);
+        if (!formData.get('bio') || formData.get('bio').trim().length < 10) {
+            alert('Please enter a longer bio.');
+            return;
+        }
+        console.log("Test: Profile Updated", profileData);
+        // Smoothly transition Profile out and Matches in
+        const profileSection = document.getElementById('profile');
+        const matchesSection = document.getElementById('matches');
+        profileSection.style.transition = 'opacity 0.5s, transform 0.5s';
+        profileSection.style.opacity = '0';
+        profileSection.style.transform = 'translateY(-30px)';
+        setTimeout(() => {
+            profileSection.style.display = 'none';
+            matchesSection.style.display = 'flex';
+            matchesSection.style.opacity = '0';
+            matchesSection.style.transform = 'translateY(30px)';
+            setTimeout(() => {
+                matchesSection.style.transition = 'opacity 0.5s, transform 0.5s';
+                matchesSection.style.opacity = '1';
+                matchesSection.style.transform = 'translateY(0)';
+            }, 10);
+            // Set nav bar active state
+            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+            document.querySelector('.nav-item[data-section="matches"]').classList.add('active');
+        }, 500);
+    });
+
+    // Swipe Functionality
+    function swipeLeft() {
+        const card = document.getElementById('swipe-card');
+        card.style.transform = 'translateX(-120%) rotate(-10deg)'; // More dramatic swipe
+        card.style.opacity = '0';
+        setTimeout(() => {
+            appState.currentMatchIndex = (appState.currentMatchIndex + 1) % appState.matches.length;
+            console.log("Test: Swiped Left on", appState.matches[appState.currentMatchIndex].name);
+            updateMatchCard();
+        }, 400); // Increased timeout for smoother animation
+    }
+
+    function swipeRight() {
+        const card = document.getElementById('swipe-card');
+        card.style.transform = 'translateX(120%) rotate(10deg)'; // More dramatic swipe
+        card.style.opacity = '0';
+        setTimeout(() => {
+            const match = appState.matches[appState.currentMatchIndex];
+            console.log("Test: Swiped Right (Match) on", match.name);
+            window.showMatchSplash(match);
+        }, 400); // Increased timeout for smoother animation
+}
+
+// Make these functions global for inline onclick
+window.showMatchSplash = function(match) {
+    // Hide all sections
+    document.querySelectorAll('section').forEach(section => section.style.display = 'none');
+    let splash = document.getElementById('match-splash');
+    if (!splash) {
+        splash = document.createElement('section');
+        splash.id = 'match-splash';
+        splash.style.display = 'flex';
+        splash.style.flexDirection = 'column';
+        splash.style.alignItems = 'center';
+        splash.style.justifyContent = 'center';
+        splash.style.height = '100vh';
+        splash.innerHTML = `
+            <div class="splash-content text-center">
+                <h1 id="match-splash-title" style="font-size:2.2rem; color:var(--primary-color);">💖 It's a Match! 💖</h1>
+                <img id="match-splash-photo" src="${match.photo}" alt="${match.name}" style="width:120px;height:120px;border-radius:50%;object-fit:cover;border:4px solid var(--primary-color);margin:18px auto 10px auto;box-shadow:0 4px 16px rgba(0,0,0,0.12);">
+                <h2 id="match-splash-name" style="font-size:1.4rem;color:var(--primary-color);margin-bottom:0.5rem;">${match.name}, ${match.age}</h2>
+                <p id="match-splash-prompt" style="font-size:1.1rem;color:var(--text-dark);margin-bottom:1.2rem;">${match.prompt ? `<em>\"${match.prompt}\"</em>` : ''}</p>
+                <p id="match-splash-witty" style="font-size:1.2rem;color:#8b3c34;margin-bottom:1.5rem;">You both swiped right! Get ready for some wedding magic. 💃🕺</p>
+                <button class="btn btn-primary mt-2 me-2" onclick="continueMatching()">Continue Matching</button>
+                <button class="btn btn-success mt-2" onclick="chatWithMatch()">Chat Now</button>
+            </div>
+        `;
+        document.querySelector('main').appendChild(splash);
+    } else {
+        // Update all splash content for new match
+        splash.style.display = 'flex';
+        const photo = splash.querySelector('#match-splash-photo');
+        if (photo) {
+            photo.src = match.photo;
+            photo.alt = match.name;
+        }
+        const name = splash.querySelector('#match-splash-name');
+        if (name) name.textContent = `${match.name}, ${match.age}`;
+        const prompt = splash.querySelector('#match-splash-prompt');
+        if (prompt) prompt.innerHTML = match.prompt ? `<em>\"${match.prompt}\"</em>` : '';
+        // The witty statement can be randomized or kept static
+        const witty = splash.querySelector('#match-splash-witty');
+        if (witty) witty.textContent = 'You both swiped right! Get ready for some wedding magic. 💃🕺';
+    }
+
+// Make chatWithMatch global and ensure it's only in the script, not in the HTML template
+window.chatWithMatch = function() {
+    // Hide the match splash
+    const splash = document.getElementById('match-splash');
+    if (splash) splash.style.display = 'none';
+    // Show chat section
+    const chatSection = document.getElementById('chat');
+    chatSection.style.display = 'flex';
+    // Set nav bar active state
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    document.querySelector('.nav-item[data-section="chat"]').classList.add('active');
+    // Set the chat list to the current match
+    const idx = appState.currentMatchIndex;
+    // Highlight the correct chat item
+    const chatItems = document.querySelectorAll('.chat-item');
+    chatItems.forEach((el, i) => {
+        if (i === idx) {
+            el.classList.add('active');
+        } else {
+            el.classList.remove('active');
+        }
+    });
+    // Update chat container with the current match's chat
+    updateChatContainer(appState.matches[idx].chat);
+    // Optionally update chat header
+    const chatHeader = document.getElementById('chat-header');
+    if (chatHeader) {
+        chatHeader.textContent = 'Chat with ' + appState.matches[idx].name.split(' ')[0];
+    }
+    // Focus the chat input
+    const chatInput = document.getElementById('chat-input');
+    if (chatInput) chatInput.focus();
+}
+
+window.continueMatching = function() {
+    const splash = document.getElementById('match-splash');
+    const matchesSection = document.getElementById('matches');
+    // Advance to next match index first
+    appState.currentMatchIndex = (appState.currentMatchIndex + 1) % appState.matches.length;
+    if (splash) {
+        // Animate splash out
+        splash.style.transition = 'opacity 0.5s, transform 0.5s';
+        splash.style.opacity = '0';
+        splash.style.transform = 'translateY(-30px)';
+        setTimeout(() => {
+            splash.style.display = 'none';
+            // Animate matches in
+            matchesSection.style.display = 'flex';
+            matchesSection.style.opacity = '0';
+            matchesSection.style.transform = 'translateX(100vw)';
+            // Update match card before animating in
+            updateMatchCard();
+            setTimeout(() => {
+                matchesSection.style.transition = 'opacity 0.5s, transform 0.5s';
+                matchesSection.style.opacity = '1';
+                matchesSection.style.transform = 'translateX(0)';
+                // Animate the card itself in from the right
+                const card = document.getElementById('swipe-card');
+                if (card) {
+                    card.style.transition = 'none';
+                    card.style.transform = 'translateX(100vw)';
+                    card.style.opacity = '1';
+                    setTimeout(() => {
+                        card.style.transition = 'transform 0.5s cubic-bezier(0.23, 1, 0.32, 1)';
+                        card.style.transform = 'translateX(0)';
+                    }, 20);
+                }
+            }, 10);
+        }, 500);
+    } else {
+        matchesSection.style.display = 'flex';
+        updateMatchCard();
+        const card = document.getElementById('swipe-card');
+        if (card) {
+            card.style.transition = 'none';
+            card.style.transform = 'translateX(100vw)';
+            card.style.opacity = '1';
+            setTimeout(() => {
+                card.style.transition = 'transform 0.5s cubic-bezier(0.23, 1, 0.32, 1)';
+                card.style.transform = 'translateX(0)';
+            }, 20);
+        }
+    }
+    // Set nav bar active state
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    document.querySelector('.nav-item[data-section="matches"]').classList.add('active');
+}
+    }
+
+    function updateMatchCard() {
+        const card = document.getElementById('swipe-card');
+        const match = appState.matches[appState.currentMatchIndex];
+        const img = card.querySelector('img');
+        if (!match) {
+            console.error("Error: No match found at index", appState.currentMatchIndex);
+            card.querySelector('.card-title').textContent = "No More Matches";
+            card.querySelector('.card-text').textContent = "Check back later for more guests!";
+            img.src = `https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&q=80&w=400&h=450`;
+            img.setAttribute('loading', 'lazy');
+            // Hide swipe buttons if no more matches
+            document.querySelector('.swipe-buttons').style.display = 'none';
+            return;
+        }
+        img.src = match.photo;
+        img.setAttribute('loading', 'lazy');
+        card.querySelector('.card-title').textContent = `${match.name}, ${match.age}`;
+        card.querySelector('.card-text').innerHTML = `${match.bio}<br><strong>Prompt:</strong> "${match.prompt}"`;
+        card.style.transform = 'translateX(0) rotate(0deg)';
+        card.style.opacity = '1';
+        updateChatContainer(match.chat);
+    }
+
+    // Update chat container with current match's chat
+    function updateChatContainer(chatHistory) {
+        const chatContainer = document.getElementById('chat-container');
+        chatContainer.innerHTML = '';
+        if (!chatHistory || chatHistory.length === 0) {
+            chatContainer.innerHTML = '<div class="text-muted text-center py-4">No messages yet. Say hello!</div>';
+            return;
+        }
+        chatHistory.forEach(msg => {
+            const bubble = document.createElement('div');
+            bubble.className = 'chat-bubble ' + (msg.from === 'me' ? 'sent' : 'received');
+            bubble.textContent = msg.text;
+            chatContainer.appendChild(bubble);
+        });
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    // Chat Functionality
+    document.getElementById('chat-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const input = document.getElementById('chat-input');
+        const message = input.value.trim();
+        if (message) {
+            const chatContainer = document.getElementById('chat-container');
+            const bubble = document.createElement('div');
+            bubble.className = 'chat-bubble sent';
+            bubble.textContent = message;
+            chatContainer.appendChild(bubble);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            console.log("Test: Sent Message", message);
+            input.value = '';
+            // Simulate a reply
+            setTimeout(() => {
+                const reply = document.createElement('div');
+                reply.className = 'chat-bubble received';
+                reply.textContent = "That sounds like fun!";
+                chatContainer.appendChild(reply);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+                console.log("Test: Received Reply");
+            }, 1000);
+        }
+    });
+
+    // Registry Contribution
+    function contributeRegistry() {
+        // Find the clicked button's card and extract info
+        const event = window.event;
+        let card = event && event.target ? event.target.closest('.card') : null;
+        if (!card) return;
+        const img = card.querySelector('img');
+        const title = card.querySelector('.card-title');
+        const price = card.querySelector('.card-text');
+        const itemImg = img ? img.src : '';
+        const itemTitle = title ? title.textContent : '';
+        const itemPrice = price ? price.textContent : '';
+        // Hide all sections
+        document.querySelectorAll('section').forEach(section => section.style.display = 'none');
+        // Witty lines for contributing
+        const wittyLines = [
+            "You're making the couple's day even brighter!",
+            "Gift incoming! You have excellent taste.",
+            "Registry hero status: unlocked.",
+            "Thanks for helping start their new adventure!",
+            "Your generosity is the real gift!"
+        ];
+        const randomLine = wittyLines[Math.floor(Math.random() * wittyLines.length)];
+        let splash = document.getElementById('contribute-splash');
+        if (!splash) {
+            splash = document.createElement('section');
+            splash.id = 'contribute-splash';
+            splash.style.display = 'flex';
+            splash.style.flexDirection = 'column';
+            splash.style.alignItems = 'center';
+            splash.style.justifyContent = 'center';
+            splash.style.height = '100vh';
+            splash.innerHTML = `
+                <div class="splash-content text-center">
+                    <h1 style="font-size:2.1rem; color:var(--primary-color);">🎁 Thank You!</h1>
+                    <img src="${itemImg}" alt="${itemTitle}" style="width:120px;height:120px;object-fit:cover;border-radius:16px;border:3px solid var(--primary-color);margin:18px auto 10px auto;box-shadow:0 4px 16px rgba(0,0,0,0.12);">
+                    <h2 style="font-size:1.3rem;color:var(--primary-color);margin-bottom:0.5rem;">${itemTitle}</h2>
+                    <p style="font-size:1.1rem;color:#8b3c34;margin-bottom:0.7rem;">${itemPrice}</p>
+                    <p style="font-size:1.2rem;color:var(--primary-color);margin-bottom:1.5rem;">${randomLine}</p>
+                    <button class="btn btn-primary mt-2" onclick="returnToRegistry()">Back to Registry</button>
+                </div>
+            `;
+            document.querySelector('main').appendChild(splash);
+        } else {
+            splash.style.display = 'flex';
+            const imgEl = splash.querySelector('img');
+            if (imgEl) imgEl.src = itemImg;
+            if (imgEl) imgEl.alt = itemTitle;
+            const h2 = splash.querySelector('h2');
+            if (h2) h2.textContent = itemTitle;
+            const pPrice = splash.querySelectorAll('p')[0];
+            if (pPrice) pPrice.textContent = itemPrice;
+            const pWitty = splash.querySelectorAll('p')[1];
+            if (pWitty) pWitty.textContent = randomLine;
+        }
+    }
+
+    function returnToRegistry() {
+        const splash = document.getElementById('contribute-splash');
+        if (splash) splash.style.display = 'none';
+        const registrySection = document.getElementById('registry');
+        registrySection.style.display = 'flex';
+        // Animate in
+        registrySection.style.opacity = '0';
+        registrySection.style.transform = 'translateY(30px)';
+        setTimeout(() => {
+            registrySection.style.transition = 'opacity 0.5s, transform 0.5s';
+            registrySection.style.opacity = '1';
+            registrySection.style.transform = 'translateY(0)';
+        }, 10);
+        // Set nav bar active state
+        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+        document.querySelector('.nav-item[data-section="registry"]').classList.add('active');
+    }
+
+    // Initialize chat list
+    function initChatList() {
+        const chatList = document.getElementById('chat-list');
+        appState.matches.forEach((match, idx) => {
+            const item = document.createElement('div');
+            item.className = 'chat-item' + (idx === 0 ? ' active' : '');
+            item.innerHTML = `
+                <img src="${match.photo}" alt="${match.name}" loading="lazy"/>
+                <div class="chat-info">
+                    <strong>${match.name}</strong>
+                    <small>${match.prompt}</small>
+                </div>
+            `;
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.chat-item').forEach(el => el.classList.remove('active'));
+                item.classList.add('active');
+                appState.currentMatchIndex = idx;
+                document.getElementById('chat-header').textContent = `Chat with ${match.name}`;
+                updateChatContainer(match.chat); // Update chat content on list item click
+            });
+            chatList.appendChild(item);
+        });
+    }
+
+    // Call init functions
+    setupNavigation();
+    initChatList();
+    updateMatchCard(); // Initial load of the first match card and chat
+
+    // Run Tests (keep this as is for your testing purposes)
+    function runAllTests() {
+        runTest("Splash Page Visible", () => {
+            const splash = document.querySelector('#splash');
+            if (splash.style.display !== 'flex') throw new Error("Splash page not visible on load");
+        });
+    }
+    // runAllTests(); // Uncomment to run tests on load
+</script>
+</body>
+</html>
